@@ -1,0 +1,39 @@
+#!/bin/bash
+
+# Pokémon list
+POKEMON_LIST=("bulbasaur" "ivysaur" "venusaur" "charmander" "charmeleon")
+
+# Output & error directories
+mkdir -p pokemon_data
+ERROR_LOG="errors.txt"
+
+echo "Starting parallel fetch..."
+
+fetch_pokemon() {
+    NAME=$(echo "$1" | tr '[:upper:]' '[:lower:]')
+    FILE="pokemon_data/${NAME}.json"
+
+    echo "Fetching $NAME..."
+
+    # Fetch API data
+    HTTP_CODE=$(curl -s -w "%{http_code}" -o "$FILE" "https://pokeapi.co/api/v2/pokemon/$NAME")
+
+    # Check success
+    if [ "$HTTP_CODE" -eq 200 ]; then
+        echo "✔ Successfully fetched: $NAME"
+    else
+        echo "✘ Failed to fetch $NAME (HTTP $HTTP_CODE)" | tee -a "$ERROR_LOG"
+        rm -f "$FILE"
+    fi
+}
+
+# Launch all fetches in parallel
+for POKEMON in "${POKEMON_LIST[@]}"; do
+    fetch_pokemon "$POKEMON" &
+done
+
+echo "Waiting for all processes to finish..."
+wait
+
+echo "All parallel fetches completed!"
+echo "JSON files saved inside ./pokemon_data/"
