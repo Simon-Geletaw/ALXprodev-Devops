@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # List of Pokémon
-POKEMON_LIST=("Bulbasaur" "Ivysaur" "Venusaur" "Charmander" "Charmeleon")
+POKEMON_LIST=("bulbasaur" "ivysaur" "venusaur" "charmander" "charmeleon")
 
 # Delay in seconds between requests (to avoid rate-limiting)
 DELAY=2
