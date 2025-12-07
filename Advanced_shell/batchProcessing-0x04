@@ -19,6 +19,8 @@ fetch_pokemon() {
 for P in "${POKEMON_LIST[@]}"; do
     fetch_pokemon "$P" &
 done
+kill
+jobs
 
 wait
 echo "Parallel fetch completed!"
