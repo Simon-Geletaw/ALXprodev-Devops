@@ -1,34 +1,24 @@
 #!/bin/bash
 
-# List of Pokémon
-POKEMON_LIST=("Bulbasaur" "Ivysaur" "Venusaur" "Charmander" "Charmeleon")
+# Pokémon JSON file
+JSON_FILE="$1"
 
-# Delay in seconds between requests (to avoid rate-limiting)
-DELAY=2
+if [ ! -f "$JSON_FILE" ]; then
+    echo "File $JSON_FILE not found!"
+    exit 1
+fi
 
-# Loop through each Pokémon
-for POKEMON in "${POKEMON_LIST[@]}"; do
-    # Convert to lowercase (PokéAPI uses lowercase names)
-    NAME=$(echo "$POKEMON" | tr '[:upper:]' '[:lower:]')
-    FILE="${NAME}.json"
-    
-    echo "Fetching data for $POKEMON..."
-    
-    # Make API request
-    RESPONSE=$(curl -s -w "%{http_code}" -o "$FILE" "https://pokeapi.co/api/v2/pokemon/$NAME")
-    HTTP_CODE=$RESPONSE
-    
-    # Check if request succeeded
-    if [ "$HTTP_CODE" -eq 200 ]; then
-        echo "Saved data to $FILE"
-    else
-        echo "Failed to fetch $POKEMON (status: $HTTP_CODE)" | tee -a errors.txt
-        # Remove incomplete file if exists
-        [ -f "$FILE" ] && rm "$FILE"
-    fi
-    
-    # Wait before next request
-    sleep $DELAY
-done
+# Extract fields using jq
+NAME=$(jq -r '.name' "$JSON_FILE")
+HEIGHT=$(jq -r '.height' "$JSON_FILE")
+WEIGHT=$(jq -r '.weight' "$JSON_FILE")
+# Extract types as comma-separated string
+TYPES=$(jq -r '[.types[].type.name] | join(", ")' "$JSON_FILE")
 
-echo "All done!"
+# Convert height and weight to meters and kg if needed (PokéAPI uses decimeters & hectograms)
+HEIGHT_M=$(echo "scale=1; $HEIGHT / 10" | bc)
+WEIGHT_KG=$(echo "scale=1; $WEIGHT / 10" | bc)
+
+# Format output
+echo "$NAME is of type $TYPES, weighs ${WEIGHT_KG}kg, and is ${HEIGHT_M}m tall." \
+    | sed -e 's/\b\(.\)/\u\1/'   # Capitalize first letter
