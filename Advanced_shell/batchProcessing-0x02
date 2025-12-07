@@ -8,16 +8,14 @@ DELAY=2
 
 # Loop through each Pokémon
 for POKEMON in "${POKEMON_LIST[@]}"; do
+    count=
     # Convert to lowercase (PokéAPI uses lowercase names)
     NAME=$(echo "$POKEMON" | tr '[:upper:]' '[:lower:]')
     FILE="${NAME}.json"
-    
     echo "Fetching data for $POKEMON..."
-    
     # Make API request
     RESPONSE=$(curl -s -w "%{http_code}" -o "$FILE" "https://pokeapi.co/api/v2/pokemon/$NAME")
     HTTP_CODE=$RESPONSE
-    
     # Check if request succeeded
     if [ "$HTTP_CODE" -eq 200 ]; then
         echo "Saved data to $FILE"

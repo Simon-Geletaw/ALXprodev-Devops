@@ -41,3 +41,4 @@ awk -F',' '
         }
     }
 ' "$OUTPUT_FILE"
+seq
