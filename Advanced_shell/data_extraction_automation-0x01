@@ -13,12 +13,13 @@ NAME=$(jq -r '.name' "$JSON_FILE")
 HEIGHT=$(jq -r '.height' "$JSON_FILE")
 WEIGHT=$(jq -r '.weight' "$JSON_FILE")
 # Extract types as comma-separated string
-TYPES=$(jq -r '[.types[].type.name] | join(", ")' "$JSON_FILE")
+types=$(jq -r '[.types[].type.name] | join(", ")' "$JSON_FILE")
 
 # Convert height and weight to meters and kg if needed (PokéAPI uses decimeters & hectograms)
-HEIGHT_M=$(echo "scale=1; $HEIGHT / 10" | bc)
-WEIGHT_KG=$(echo "scale=1; $WEIGHT / 10" | bc)
+formatted_height=$(echo "scale=1; $HEIGHT / 10" | bc)
+formatted_weight=$(echo "scale=1; $WEIGHT / 10" | bc)
 
 # Format output
-echo "$NAME is of type $TYPES, weighs ${WEIGHT_KG}kg, and is ${HEIGHT_M}m tall." \
+echo "$NAME is of type $types, weighs ${formatted_weight}kg, and is ${formatted_height}m tall." \
     | sed -e 's/\b\(.\)/\u\1/'   # Capitalize first letter
+awk '{print $0}'  # Ensure proper output formatting
